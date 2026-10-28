@@ -3,7 +3,7 @@
 **Difficulty**: Beginner (Compound V2 graduates)
 **Time Limit**: 2 days
 **Scope**: the lending contracts and adjacent CASH/KYC subsystem described below
-**Historical contest scope**: 4,365 SLOC; the lending-only estimate was ~2,610. These are inherited counts, not a new combined source measurement.
+**Historical contest scope**: 4,365 SLOC across 30 files.
 
 ## What Is Flux Finance?
 
@@ -13,9 +13,9 @@ The core idea: Ondo needed a lending market where KYC'd users could borrow again
 
 ## Exercise scope
 
-This exercise follows the Academy target across both the lending contracts and the adjacent CASH/KYC subsystem in the January 2023 Ondo contest snapshot. Start with the familiar lending fork, then review `contracts/cash/CashManager.sol`, `contracts/cash/kyc/`, and the CASH tokens in `contracts/cash/token/`. Include the functions, imports and interfaces those paths depend on. The historical contest total is 4,365 SLOC; the per-file counts below describe the existing lending inventory, not a fresh combined recount.
+This exercise follows the Academy target across both the lending contracts and the adjacent CASH/KYC subsystem in the January 2023 Ondo contest snapshot. Start with the familiar lending fork, then review `contracts/cash/CashManager.sol`, `contracts/cash/kyc/`, and the CASH tokens in `contracts/cash/token/`. Include `contracts/cash/factory/`, `contracts/cash/Proxy.sol` and `contracts/cash/interfaces/` as supporting code, plus the functions and imports those paths depend on. The historical contest total is 4,365 SLOC; the per-file counts below describe the existing lending inventory, not a fresh combined recount.
 
-The contracts under `contracts/lending/compound/` provide a comparison baseline and dependencies; they are not separate targets to re-audit wholesale. Read inherited assumptions where needed rather than assuming unchanged code is safe in every initialization.
+The contracts under `contracts/lending/compound/` vendor an older Compound revision (Solidity 0.5) for comparison and dependencies, not the direct parent of the Solidity 0.8 modified lending files; a full diff includes changes Ondo did not make. They are not separate targets to re-audit wholesale. Read inherited assumptions where needed rather than assuming unchanged code is safe in every initialization.
 
 ## Architecture
 
@@ -133,5 +133,5 @@ Findings must include: severity, affected file(s), root cause description, impac
 ## Important Notes
 
 - **Scope includes lending and CASH/KYC as described above.** This matches the Academy exercise. Review both subsystems before submitting; the debrief belongs after your attempt.
-- The `contracts/lending/compound/` directory contains unmodified Compound V2 code and is not in scope.
+- The `contracts/lending/compound/` directory contains an older Compound comparison and dependencies, not a separate wholesale audit target.
 - Compare Ondo changes with the baseline, and check inherited assumptions against market initialization and the new integrations. Prior review of a parent does not establish every fork’s safety.
