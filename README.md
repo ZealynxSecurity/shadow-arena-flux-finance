@@ -2,14 +2,20 @@
 
 **Difficulty**: Beginner (Compound V2 graduates)
 **Time Limit**: 2 days
-**Scope**: `contracts/lending/` only
-**Total In-Scope SLOC**: ~2,610 (modified contracts only)
+**Scope**: the lending contracts and adjacent CASH/KYC subsystem described below
+**Historical contest scope**: 4,365 SLOC; the lending-only estimate was ~2,610. These are inherited counts, not a new combined source measurement.
 
 ## What Is Flux Finance?
 
 Flux Finance is a **Compound V2 fork** built by Ondo Finance that adds KYC and sanctions compliance to a lending market. It allows permissioned assets (like OUSG, a tokenized US Treasury product) and permissionless stablecoins (DAI, USDC, USDT, FRAX, LUSD) to coexist in the same lending protocol.
 
 The core idea: Ondo needed a lending market where KYC'd users could borrow against their real-world asset tokens, while permissionless stablecoin suppliers could earn yield without KYC. Flux achieves this by forking Compound V2's cToken contracts and injecting KYC/sanctions checks at specific entry points.
+
+## Exercise scope
+
+This exercise follows the Academy target across both the lending contracts and the adjacent CASH/KYC subsystem in the January 2023 Ondo contest snapshot. Start with the familiar lending fork, then review `contracts/cash/CashManager.sol`, `contracts/cash/kyc/`, and the CASH tokens in `contracts/cash/token/`. Include the functions, imports and interfaces those paths depend on. The historical contest total is 4,365 SLOC; the per-file counts below describe the existing lending inventory, not a fresh combined recount.
+
+The contracts under `contracts/lending/compound/` provide a comparison baseline and dependencies; they are not separate targets to re-audit wholesale. Read inherited assumptions where needed rather than assuming unchanged code is safe in every initialization.
 
 ## Architecture
 
@@ -32,11 +38,10 @@ The lending directory contains two parallel cToken implementations plus shared i
 | OndoPriceOracleV2 | `OndoPriceOracleV2.sol` | 207 | V2 oracle: adds Chainlink support and price caps |
 | JumpRateModelV2 | `JumpRateModelV2.sol` | 123 | Interest rate model, modified `blocksPerYear` only |
 
-### Out of Scope
+### Reference and dependency directories
 
 | Directory | Reason |
 |-----------|--------|
-| `contracts/cash/` | CashManager, KYCRegistry, Cash tokens. Separate protocol (minting/redeeming OUSG). Not part of this shadow audit. |
 | `contracts/lending/compound/` | Unchanged Compound V2 Comptroller and libraries |
 | `contracts/lending/tokens/cErc20Delegate/` | Unchanged Compound V2 base contracts |
 | `contracts/lending/chainlink/` | Chainlink interface |
@@ -53,7 +58,7 @@ Flux has two types of markets:
 
 ### KYC and Sanctions Architecture
 
-The KYC system lives in `contracts/cash/` (out of scope for this audit), but the lending contracts consume it:
+The KYC system lives in `contracts/cash/` (included in the extended exercise scope), but the lending contracts consume it:
 
 - Each cToken stores a `kycRegistry` address and a `kycRequirementGroup`
 - KYC checks call `kycRegistry.getKYCStatus(kycRequirementGroup, account)`
@@ -83,6 +88,10 @@ This affects the economics of liquidation in both market types.
 4. **OndoPriceOracle.sol** then **OndoPriceOracleV2.sol**: Understand how asset prices are determined. Look at the oracle type system in V2.
 5. **cErc20ModifiedDelegator.sol**: The proxy. Check that storage layout matches the delegate implementations.
 6. **JumpRateModelV2.sol**: Quick read. Only `blocksPerYear` changed.
+
+## CASH subsystem reading route
+
+After the lending pass, map the CASH request, settlement, refund and administration paths. Follow epoch state and identity status across transactions; read the complete called functions and dependency contracts, rather than only their names. Record which source path and snapshot each submission concerns.
 
 ## What to Look For
 
@@ -123,6 +132,6 @@ Findings must include: severity, affected file(s), root cause description, impac
 
 ## Important Notes
 
-- **Scope is `contracts/lending/` only.** Findings in `contracts/cash/` (CashManager, KYCRegistry, Cash tokens) are out of scope for this shadow audit. Some real C4 findings targeted cash/ and are included in the catalog for educational reference but are marked accordingly.
+- **Scope includes lending and CASH/KYC as described above.** This matches the Academy exercise. Review both subsystems before submitting; the debrief belongs after your attempt.
 - The `contracts/lending/compound/` directory contains unmodified Compound V2 code and is not in scope.
-- Focus on what Ondo CHANGED. The unchanged Compound V2 code has been extensively audited. Your value-add is analyzing the modifications and their interactions with the existing codebase.
+- Compare Ondo changes with the baseline, and check inherited assumptions against market initialization and the new integrations. Prior review of a parent does not establish every fork’s safety.
